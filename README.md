@@ -47,7 +47,7 @@ $ pip install -r requirements.txt
 Для Яндекс.Маркет:
 
 ```Python
-MARKET_TOKEN=           # Ваш токен доступа Яндекс.Маркет
+MARKET_TOKEN=           # Ваш API ключ Яндекс.Маркет
 FBS_ID=                 # Идентификатор_кампании_FBS
 DBS_ID=                 # Идентификатор_кампании_DBS
 WAREHOUSE_FBS_ID=       # Идентификатор_склада_FBS
