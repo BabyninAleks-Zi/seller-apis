@@ -23,12 +23,13 @@ def get_product_list(last_id, client_id, seller_token):
         dict: Результат запроса, содержащий список товаров и метаданные пагинации.
 
     Пример корректного исполнения:
-        >>> result = get_product_list("", "id клиента", "токен")
+        >>> get_product_list("", "id клиента", "ТОКЕН")
         >>> "items" in result
         True
 
     Пример некорректного исполнения:
-        >>> get_product_list("", "некорректный id", "некорректный токен")
+        >>> get_product_list("", "Некорректный id", "Некорректный ТОКЕН")
+        Error
     """
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
@@ -59,10 +60,11 @@ def get_offer_ids(client_id, seller_token):
         list: Список строк-артикулов всех товаров магазина.
 
     Пример корректного исполнения:
-        >>> ids = get_offer_ids("id клиента", "токен")
+        >>> ids = get_offer_ids("id клиента", "ТОКЕН")
         
     Пример некорректного исполнения:
-        >>> get_offer_ids("некорректный id", "некорректный токен")
+        >>> get_offer_ids("Некорректный id", "Некорректный ТОКЕН")
+        Error
     """
     last_id = ""
     product_list = []
@@ -91,12 +93,13 @@ def update_price(prices: list, client_id, seller_token):
         dict: Ответ от API Ozon о результате обновления цен.
 
     Пример корректного исполнения:
-        >>> prices = [{"offer_id": "123", "price": "5990"}]
-        >>> result = update_price(prices, "id клиента", "токен")
+        >>> prices = create_prices()
+        >>> result = update_price(prices, "id клиента", "ТОКЕН")
         True
 
     Пример некорректного исполнения:
-        >>> update_price([пустой файл или неверные артикулы], "некорректный id", "некорректный токен")
+        >>> update_price([Пустой файл или неверные артикулы], "Некорректный id", "Некорректный ТОКЕН")
+        Error
     """
     url = "https://api-seller.ozon.ru/v1/product/import/prices"
     headers = {
@@ -121,13 +124,14 @@ def update_stocks(stocks: list, client_id, seller_token):
         dict: Ответ от API Ozon о результате обновления остатков.
 
     Пример корректного исполнения:
-        >>> stocks = [{"offer_id": "123", "stock": 10}]
-        >>> result = update_stocks(stocks, "id клиента", "токен")
+        >>> stocks = create_stocks()
+        >>> result = update_stocks(stocks, "id клиента", "ТОКЕН")
         >>> isinstance(result, dict)
         True
 
     Пример некорректного исполнения:
-        >>> update_stocks([неверные артикулы], "некорректный id", "некорректный токен")
+        >>> update_stocks([Неверные артикулы], "Некорректный id", "Некорректный ТОКЕН")
+        Error
     """
     url = "https://api-seller.ozon.ru/v1/product/import/stocks"
     headers = {
@@ -147,10 +151,10 @@ def download_stock():
         list: Список словарей с информацией о товарах (Артикул, Количество, Цена).
 
     Пример корректного исполнения:
-        >>> remnants = download_stock()
+        >>> download_stock()
     
     Пример некорректного исполнения:
-        >>> remnants = download_stock()
+        >>> download_stock()
         Сайт недоступен    
     """
     # Скачать остатки с сайта
@@ -183,13 +187,14 @@ def create_stocks(watch_remnants, offer_ids):
         list: Список словарей для обновления остатков.
 
     Пример корректного исполнения:
-        >>> remnants = [{"Артикул": "123", "Количество": "5"}]
-        >>> ids = ["123", "456"]
+        >>> remnants = [{"Артикул": "111", "Количество": "5"}]
+        >>> ids = ["111", "222"]
         >>> create_stocks(remnants, ids)
         5
 
     Пример некорректного исполнения:
         >>> create_stocks([пустой список], [пустой список])
+        None
     """
     # Уберем то, что не загружено в seller
     stocks = []
@@ -221,13 +226,14 @@ def create_prices(watch_remnants, offer_ids):
         list: Список словарей для обновления цен.
 
     Пример корректного исполнения:
-        >>> remnants = [{"Код": "123", "Цена": "5 345.67 руб."}]
-        >>> ids = ["123"]
+        >>> remnants = [{"Артикул": "111", "Цена": "12 345.67 руб."}]
+        >>> ids = ["111"]
         >>> create_prices(remnants, ids)
-        '5345'
+        '12345'
 
     Пример некорректного исполнения:
-        >>> create_prices([{"Код": "123"}], [пустой список])
+        >>> create_prices([{"Код": "111"}], [пустой список])
+        [пустой список]
     """
     prices = []
     for watch in watch_remnants:
@@ -253,7 +259,7 @@ def price_conversion(price: str) -> str:
         str: Целочисленное представление цены без разделителей.
 
     Пример корректного исполнения:
-        >>> price_conversion("5 345.67 руб.")
+        >>> price_conversion("12 345.67 руб.")
         '12345'
         >>> price_conversion("111.11")
         '111'
@@ -317,7 +323,7 @@ def main():
         >>> main(): Выполнит полную синхронизацию без ошибок
 
     Пример некорректного исполнения:
-        # При отсутствии переменных окружения вызовет ошибку
+        При отсутствии переменных окружения вызовет ошибку
     """
     env = Env()
     seller_token = env.str("SELLER_TOKEN")
