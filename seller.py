@@ -12,7 +12,24 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(last_id, client_id, seller_token):
-    """Получить список товаров магазина озон"""
+    """Получает список товаров магазина Ozon.
+
+    Args:
+        last_id (str): Идентификатор последнего полученного товара.
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для авторизации в API Ozon.
+
+    Returns:
+        dict: Результат запроса, содержащий список товаров и метаданные пагинации.
+
+    Пример корректного исполнения:
+        >>> result = get_product_list("", "id клиента", "токен")
+        >>> "items" in result
+        True
+
+    Пример некорректного исполнения:
+        >>> get_product_list("", "некорректный id", "некорректный токен")
+    """
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
         "Client-Id": client_id,
@@ -32,7 +49,21 @@ def get_product_list(last_id, client_id, seller_token):
 
 
 def get_offer_ids(client_id, seller_token):
-    """Получить артикулы товаров магазина озон"""
+     """Получает все артикулы товаров магазина Ozon.
+
+    Args:
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для авторизации в API Ozon.
+
+    Returns:
+        list: Список строк-артикулов всех товаров магазина.
+
+    Пример корректного исполнения:
+        >>> ids = get_offer_ids("id клиента", "токен")
+        
+    Пример некорректного исполнения:
+        >>> get_offer_ids("некорректный id", "некорректный токен")
+    """
     last_id = ""
     product_list = []
     while True:
@@ -49,7 +80,24 @@ def get_offer_ids(client_id, seller_token):
 
 
 def update_price(prices: list, client_id, seller_token):
-    """Обновить цены товаров"""
+    """Обновляет цены товаров на Ozon через API.
+
+    Args:
+        prices (list): Список словарей с данными о ценах товаров.
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для авторизации в API Ozon.
+
+    Returns:
+        dict: Ответ от API Ozon о результате обновления цен.
+
+    Пример корректного исполнения:
+        >>> prices = [{"offer_id": "123", "price": "5990"}]
+        >>> result = update_price(prices, "id клиента", "токен")
+        True
+
+    Пример некорректного исполнения:
+        >>> update_price([пустой файл или неверные артикулы], "некорректный id", "некорректный токен")
+    """
     url = "https://api-seller.ozon.ru/v1/product/import/prices"
     headers = {
         "Client-Id": client_id,
@@ -62,7 +110,25 @@ def update_price(prices: list, client_id, seller_token):
 
 
 def update_stocks(stocks: list, client_id, seller_token):
-    """Обновить остатки"""
+    """Обновляет остатки товаров на Ozon через API.
+
+    Args:
+        stocks (list): Список словарей с данными об остатках товаров.
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для авторизации в API Ozon.
+
+    Returns:
+        dict: Ответ от API Ozon о результате обновления остатков.
+
+    Пример корректного исполнения:
+        >>> stocks = [{"offer_id": "123", "stock": 10}]
+        >>> result = update_stocks(stocks, "id клиента", "токен")
+        >>> isinstance(result, dict)
+        True
+
+    Пример некорректного исполнения:
+        >>> update_stocks([неверные артикулы], "некорректный id", "некорректный токен")
+    """
     url = "https://api-seller.ozon.ru/v1/product/import/stocks"
     headers = {
         "Client-Id": client_id,
@@ -75,7 +141,18 @@ def update_stocks(stocks: list, client_id, seller_token):
 
 
 def download_stock():
-    """Скачать файл ostatki с сайта casio"""
+    """Скачивает файл ostatki с сайта casio
+
+    Returns:
+        list: Список словарей с информацией о товарах (Артикул, Количество, Цена).
+
+    Пример корректного исполнения:
+        >>> remnants = download_stock()
+    
+    Пример некорректного исполнения:
+        >>> remnants = download_stock()
+        Сайт недоступен    
+    """
     # Скачать остатки с сайта
     casio_url = "https://timeworld.ru/upload/files/ostatki.zip"
     session = requests.Session()
@@ -96,6 +173,24 @@ def download_stock():
 
 
 def create_stocks(watch_remnants, offer_ids):
+    """Формирует список остатков для обновления.
+
+    Args:
+        watch_remnants (list): Список словарей с данными от поставщика.
+        offer_ids (list): Список артикулов товаров.
+
+    Returns:
+        list: Список словарей для обновления остатков.
+
+    Пример корректного исполнения:
+        >>> remnants = [{"Артикул": "123", "Количество": "5"}]
+        >>> ids = ["123", "456"]
+        >>> create_stocks(remnants, ids)
+        5
+
+    Пример некорректного исполнения:
+        >>> create_stocks([пустой список], [пустой список])
+    """
     # Уберем то, что не загружено в seller
     stocks = []
     for watch in watch_remnants:
@@ -116,6 +211,24 @@ def create_stocks(watch_remnants, offer_ids):
 
 
 def create_prices(watch_remnants, offer_ids):
+    """Формирует список цен для обновления.
+
+    Args:
+        watch_remnants (list): Список словарей с данными от поставщика.
+        offer_ids (list): Список артикулов.
+
+    Returns:
+        list: Список словарей для обновления цен.
+
+    Пример корректного исполнения:
+        >>> remnants = [{"Код": "123", "Цена": "5 345.67 руб."}]
+        >>> ids = ["123"]
+        >>> create_prices(remnants, ids)
+        '5345'
+
+    Пример некорректного исполнения:
+        >>> create_prices([{"Код": "123"}], [пустой список])
+    """
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -131,7 +244,20 @@ def create_prices(watch_remnants, offer_ids):
 
 
 def price_conversion(price: str) -> str:
-    """Преобразовать цену. Пример: 5'990.00 руб. -> 5990"""
+    """Преобразует строку с ценой в целочисленный строковый формат.
+
+    Args:
+        price (str): Цена в произвольном формате с разделителями.
+                     
+    Returns:
+        str: Целочисленное представление цены без разделителей.
+
+    Пример корректного исполнения:
+        >>> price_conversion("5 345.67 руб.")
+        '12345'
+        >>> price_conversion("111.11")
+        '111'
+    """
     return re.sub("[^0-9]", "", price.split(".")[0])
 
 
@@ -142,6 +268,19 @@ def divide(lst: list, n: int):
 
 
 async def upload_prices(watch_remnants, client_id, seller_token):
+    """Загружает цены товаров на Ozon.
+
+    Получает список товаров с Ozon, формирует цены и отправляет их
+    частями по 1000 товаров за запрос.
+
+    Args:
+        watch_remnants (list): Данные от поставщика.
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для Ozon.
+
+    Returns:
+        list: Список всех сформированных цен.
+    """
     offer_ids = get_offer_ids(client_id, seller_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_price in list(divide(prices, 1000)):
@@ -150,6 +289,18 @@ async def upload_prices(watch_remnants, client_id, seller_token):
 
 
 async def upload_stocks(watch_remnants, client_id, seller_token):
+    """Загружает остатки товаров на Ozon.
+
+    Args:
+        watch_remnants (list): Данные от поставщика.
+        client_id (str): ID клиента для авторизации в API Ozon.
+        seller_token (str): API-ключ для Ozon.
+
+    Returns:
+        Кортеж: (not_empty, stocks) где:
+            not_empty (list): Товары с ненулевым остатком.
+            stocks (list): Все товары с остатками.
+    """
     offer_ids = get_offer_ids(client_id, seller_token)
     stocks = create_stocks(watch_remnants, offer_ids)
     for some_stock in list(divide(stocks, 100)):
@@ -159,6 +310,15 @@ async def upload_stocks(watch_remnants, client_id, seller_token):
 
 
 def main():
+    """
+    Основная функция для запуска синхронизации с Ozon.
+
+    Пример корректного исполнения:
+        >>> main(): Выполнит полную синхронизацию без ошибок
+
+    Пример некорректного исполнения:
+        # При отсутствии переменных окружения вызовет ошибку
+    """
     env = Env()
     seller_token = env.str("SELLER_TOKEN")
     client_id = env.str("CLIENT_ID")
